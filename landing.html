@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hygiene Tracker</title>
+
+  <!-- Bootstrap -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <!-- Bootstrap Icons -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    rel="stylesheet"
+  />
+
+  <!-- Inline Custom Styles -->
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    /* NAVBAR */
+    .navbar-brand {
+      font-weight: 700;
+      color: #2b7a78 !important;
+    }
+
+    /* HERO */
+    .hero {
+      /* background: linear-gradient(135deg, #2b7a78, #3aafa9); */
+      background: linear-gradient(
+              135deg,
+              rgba(43,122,120,0.95),
+              rgba(43,122,120,0.75)
+            ),
+            url('../assets/images/landing.jpg')
+            center / cover no-repeat;
+      color: white;
+      padding: 120px 20px;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+    }
+
+    .hero img {
+      max-width: 100%;
+    }
+
+    /* BUTTONS */
+    .btn-light-outline {
+      border: 2px solid white;
+      color: white;
+    }
+
+    .btn-light-outline:hover {
+      background: white;
+      color: #2b7a78;
+    }
+
+    /* SECTION */
+    section {
+      padding: 90px 20px;
+    }
+
+    section h2 {
+      color: #2b7a78;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+
+    /* FEATURE CARDS */
+    .feature-card {
+      border: none;
+      border-radius: 16px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    .feature-icon {
+      font-size: 2.5rem;
+      color: #2b7a78;
+    }
+    .feature-card {
+  background-color: #2b7a7715;
+  border: none;
+  border-radius: 16px;
+}
+.feature-card h5 {
+  font-weight: 600;
+}
+
+.feature-card p {
+  color: #333;
+}
+.feature-card:hover {
+  background-color: #2b7a7705; /* slightly stronger on hover */
+}
+
+    /* STATS */
+    .stats {
+      background: #2b7a7715;
+    }
+
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #2b7a78;
+    }
+
+    /* FOOTER */
+    footer {
+      background: #2b7a78;
+      color: white;
+      padding: 30px 20px;
+    }
+    /* ===== NAVBAR BUTTON FIX ===== */
+
+/* Login button */
+.navbar .btn-outline-primary {
+  color: #2b7a78;
+  border-color: #2b7a78;
+  font-weight: 600;
+}
+
+.navbar .btn-outline-primary:hover {
+  background-color: #2b7a78;
+  color: #ffffff;
+}
+
+/* Register button */
+.navbar .btn-primary {
+  background-color: #2b7a78;
+  border-color: #2b7a78;
+  font-weight: 600;
+}
+
+.navbar .btn-primary:hover {
+  background-color: #256d6b;
+  border-color: #256d6b;
+}
+
+/* Navbar links consistency */
+.navbar .nav-link {
+  color: #555 !important;
+  font-weight: 500;
+}
+
+.navbar .nav-link:hover {
+  color: #2b7a78 !important;
+}
+/* WHY SECTION */
+.why-section {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #f0f7f6 100%
+  );
+  padding: 90px 20px;
+}
+
+.section-title {
+  color: #2b7a78;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  max-width: 720px;
+  margin: 12px auto 0;
+  color: #555;
+}
+
+/* WHY CARDS */
+.why-card {
+  background: #2b7a7715;
+  border-radius: 18px;
+  padding: 35px 25px;
+  height: 100%;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.why-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 22px 45px rgba(0, 0, 0, 0.12);
+}
+
+.why-icon {
+  font-size: 2.6rem;
+  color: #2b7a78;
+  margin-bottom: 15px;
+}
+
+.why-card h5 {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.why-card p {
+  color: #444;
+  font-size: 0.95rem;
+}
+/* SMOOTH SCROLL */
+html {
+  scroll-behavior: smooth;
+}
+
+/* HOW IT WORKS SECTION */
+.how-section {
+  padding: 90px 20px;
+  background: #ffffff;
+}
+
+.how-card {
+  padding: 25px;
+}
+
+.how-icon {
+  font-size: 2.4rem;
+  color: #2b7a78;
+  margin-bottom: 12px;
+}
+
+.how-card h6 {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.how-card p {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">Hygiene Tracker</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="nav">
+        <ul class="navbar-nav ms-auto align-items-lg-center">
+          <li class="nav-item"><a class="nav-link" href="#hero">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="#why">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+          <li class="nav-item ms-lg-3">
+            <a href="index.html" class="btn btn-outline-primary me-2">Login</a>
+            <a href="register.html" class="btn btn-primary">Register</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero" class="hero">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h1>Cleaner Cities.<br>Smarter Governance.</h1>
+          <p class="mt-3">
+            Hygiene Tracker empowers citizens to report public hygiene issues
+            and enables authorities to act faster with transparency.
+          </p>
+          <div class="mt-4">
+            <a href="register.html" class="btn btn-light btn-lg me-2">Get Started</a>
+            <a href="#how-it-works" class="btn btn-light-outline btn-lg">Learn More</a>
+          </div>
+        </div>
+        <div class="col-md-6 text-center">
+          <img
+            src="assets/images/landing image1.png"
+            alt="City Illustration"
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="why" class="why-section">
+  <div class="container text-center">
+    <h2 class="section-title">Why Hygiene Tracker?</h2>
+    <p class="section-subtitle">
+      Public hygiene issues often go unheard. We change that by creating
+      a transparent, accountable, and action-driven reporting system.
+    </p>
+
+    <div class="row mt-5">
+      <div class="col-md-4 mb-4">
+        <div class="why-card">
+          <i class="bi bi-shield-check why-icon"></i>
+          <h5>Accountability</h5>
+          <p>
+            Every reported issue is tracked, assigned, and monitored —
+            ensuring responsible authorities take action.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="why-card">
+          <i class="bi bi-eye why-icon"></i>
+          <h5>Transparency</h5>
+          <p>
+            Citizens can see the real-time status of complaints,
+            bringing visibility to the resolution process.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-4 mb-4">
+        <div class="why-card">
+          <i class="bi bi-lightning-charge why-icon"></i>
+          <h5>Faster Action</h5>
+          <p>
+            Digital reporting and prioritization help reduce delays
+            and improve response times.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    <!-- HOW IT WORKS -->
+
+<section id="how-it-works" class="how-section">
+  <div class="container text-center">
+    <h2 class="section-title">How Hygiene Tracker Works</h2>
+    <p class="section-subtitle">
+      A simple, transparent process that turns citizen reports
+      into real action on the ground.
+    </p>
+
+    <div class="row mt-5">
+      <div class="col-md-3 mb-4">
+        <div class="how-card">
+          <i class="bi bi-pencil-square how-icon"></i>
+          <h6>Report an Issue</h6>
+          <p>Citizens report public hygiene issues through the platform.</p>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-4">
+        <div class="how-card">
+          <i class="bi bi-geo-alt how-icon"></i>
+          <h6>Add Location & Details</h6>
+          <p>Accurate location and issue details are captured.</p>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-4">
+        <div class="how-card">
+          <i class="bi bi-bell how-icon"></i>
+          <h6>Authority Notification</h6>
+          <p>Relevant authorities are notified instantly.</p>
+        </div>
+      </div>
+
+      <div class="col-md-3 mb-4">
+        <div class="how-card">
+          <i class="bi bi-check-circle how-icon"></i>
+          <h6>Track Resolution</h6>
+          <p>Users track progress until the issue is resolved.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- FEATURES -->
+  <section id="features" class="bg-light">
+    <div class="container text-center">
+      <h2>What We Offer</h2>
+      <div class="row mt-5">
+        <div class="cc col-md-4 mb-4">
+          <div class="card feature-card p-4">
+            <i class="bi bi-geo-alt-fill feature-icon"></i>
+            <h5 class="mt-3">Location-based Reporting</h5>
+            <p>Report hygiene issues with accurate location data.</p>
+          </div>
+        </div>
+        <div class="cc col-md-4 mb-4">
+          <div class="card feature-card p-4">
+            <i class="bi bi-clock-history feature-icon"></i>
+            <h5 class="mt-3">Real-time Tracking</h5>
+            <p>Track issue status from submission to resolution.</p>
+          </div>
+        </div>
+        <div class="cc col-md-4 mb-4">
+          <div class="card feature-card p-4">
+            <i class="bi bi-building feature-icon"></i>
+            <h5 class="mt-3">Authority Dashboard</h5>
+            <p>Officials manage, prioritize, and resolve issues efficiently.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- IMPACT STATS -->
+  <section id="impact" class="stats">
+    <div class="container text-center">
+      <h2>Our Vision for Impact</h2>
+      <div class="row mt-4">
+        <div class="col-md-4">
+          <div class="stat-number">24x7</div>
+          <p>Citizen Reporting</p>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-number">100%</div>
+          <p>Transparency</p>
+        </div>
+        <div class="col-md-4">
+          <div class="stat-number">Faster</div>
+          <p>Issue Resolution</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="text-center">
+    <p class="mb-0">© 2025 Hygiene Tracker. Built for cleaner communities.</p>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

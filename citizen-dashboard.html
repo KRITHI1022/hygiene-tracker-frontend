@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Citizen Dashboard • Hygiene Tracker</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<style>
+:root{
+  --primary:#2b7a78; --ink:#10373a; --muted:#6b7a79; --bg:#f6fbfb; --paper:#fff; --ring:rgba(43,122,120,.18);
+}
+html,body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+  margin:0;
+}
+a{text-decoration:none}
+
+/* navbar + page shell (aligned with official) */
+.navbar{
+  height:64px;
+  box-shadow:0 1px 6px rgba(12,20,20,0.06);
+  background:#fff;
+  border-bottom:1px solid rgba(0,0,0,0.03);
+}
+
+/* page body offset to clear fixed navbar */
+.page-body{
+  padding-top:84px;
+}
+
+/* left sidebar theme (twin of official) */
+.leftnav-theme {
+  background: var(--primary);
+  color: #fff;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  height: calc(100vh - 64px);
+  position: sticky;
+  top: 64px;
+  box-shadow: 4px 0 20px rgba(0,0,0,0.08);
+  z-index: 20;
+}
+
+.nav-link-theme {
+  display: block;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+.nav-link-theme:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.12);
+  transform: translateX(3px);
+}
+.nav-link-theme.active {
+  color: #fff;
+  background: rgba(255,255,255,0.18);
+  box-shadow: inset 2px 0 0 #ffffff;
+}
+
+/* cards + shared styles */
+.stat{
+  border-radius:14px;
+  background:#fff;
+  border:1px solid rgba(16,24,24,.06);
+  padding:1rem;
+}
+.stat h3{font-weight:700; color:var(--primary); margin:0}
+.stat small{color:var(--muted)}
+
+.card-soft{
+  background:var(--paper);
+  border-radius:16px;
+  border:1px solid rgba(16,24,24,.06);
+}
+.shadow-soft{
+  box-shadow:0 8px 28px rgba(16,24,24,.08);
+}
+.btn-theme{
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:10px;
+}
+.btn-theme:hover{
+  background:#226f6d;
+  color:#fff;
+}
+.badge-soft{
+  background:#e9f6f5;
+  color:#335152;
+  border-radius:999px;
+  font-weight:500;
+}
+.section-title{
+  font-size:.9rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:600;
+}
+
+#map{
+  min-height:280px;
+  height:280px;
+  border-radius:14px;
+  border:1px solid rgba(16,24,24,.06);
+  overflow:hidden;
+  background:#f0f4f4;
+}
+.leaflet-container{
+  width:100%!important;
+}
+
+/* table */
+.table-sm th,.table-sm td{padding:.4rem .5rem}
+.table thead th{
+  font-size:.8rem;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--muted);
+  border-bottom-color:rgba(16,24,24,.08);
+}
+#recentReportsBody tr:hover{background:#f3fbfa}
+
+/* form */
+.form-label{
+  font-size:.82rem;
+  font-weight:700;
+  letter-spacing:.35px;
+  color:var(--primary);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.form-control,.form-select{
+  border-radius:10px;
+  background:#f9fbfb;
+  border:1px solid rgba(16,24,24,.15);
+}
+.form-control:focus,.form-select:focus{
+  background:#fff;
+  border-color:var(--primary);
+  box-shadow:0 0 0 .25rem rgba(43,122,120,.15);
+}
+
+/* chips, awareness, etc. */
+.chip{
+  border-radius:999px;
+  background:#e9f6f5;
+  padding:.15rem .65rem;
+  font-size:.78rem;
+  color:#335152;
+  display:inline-flex;
+  align-items:center;
+  gap:.25rem;
+}
+.chip i{font-size:.8rem}
+
+.awareness-card{
+  border-radius:14px;
+  background:linear-gradient(135deg,#2b7a78,#205359);
+  color:#fff;
+  padding:1rem;
+  position:relative;
+  overflow:hidden;
+}
+.awareness-card::after{
+  content:"";
+  position:absolute;
+  inset:auto -40px -60px auto;
+  width:180px;
+  height:180px;
+  background:radial-gradient(circle at center,rgba(255,255,255,.24),transparent);
+  opacity:.8;
+}
+.awareness-card h6{font-weight:700}
+.awareness-card p{font-size:.86rem; margin-bottom:.4rem}
+.awareness-tag{
+  font-size:.76rem;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  opacity:.85;
+}
+
+/* timeline */
+.timeline-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  background:var(--primary);
+  margin-top:.35rem;
+}
+.timeline-line{
+  width:2px;
+  flex:1;
+  background:linear-gradient(to bottom, var(--primary), transparent);
+}
+
+/* misc */
+.toast-container{
+  position:fixed;
+  top:1rem;
+  right:1rem;
+  z-index:1200;
+}
+.quick-actions .btn{border-radius:10px}
+.filter-pill{
+  border-radius:999px;
+  border:1px solid rgba(16,24,24,.12);
+  padding:.2rem .75rem;
+  font-size:.8rem;
+  background:#fff;
+  color:#335152;
+}
+.filter-pill.active{
+  background:var(--primary);
+  color:#fff;
+  border-color:transparent;
+}
+.location-cta {
+  border-left: 0;
+  white-space: nowrap;
+}
+
+#reportLocation:focus,
+.location-cta:focus {
+  box-shadow: 0 0 0 0.15rem rgba(43, 122, 120, 0.25);
+}
+
+/* Location + GPS as one clean control */
+.location-group .input-group-text,
+.location-group .form-control,
+.location-group .btn-location-gps {
+  border-color: #2b7a78;
+}
+
+.location-group .input-group-text {
+  background: #f9fffd;
+}
+
+.btn-location-gps {
+  background-color: #2b7a78;
+  color: #ffffff;
+  border-color: #2b7a78;
+  font-weight: 500;
+}
+
+.location-group .form-control:focus,
+.location-group .btn-location-gps:focus {
+  box-shadow: 0 0 0 0.12rem rgba(43, 122, 120, 0.35);
+}
+
+/* Smooth rounded corners across the whole control */
+.location-group .input-group-text {
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
+}
+
+.location-group .form-control {
+  border-radius: 0;
+}
+
+.location-group .btn-location-gps {
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+/* Small-screen behavior: GPS text hides, icon stays */
+@media (max-width: 576px) {
+  .btn-location-gps {
+    padding-inline: 0.75rem;
+  }
+}
+
+/* container */
+.location-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+/* the input (full width, normal rectangle) */
+.location-input {
+  padding-right: 3rem;
+  border-radius: 0.75rem;
+}
+
+/* GPS button placed INSIDE the input box */
+.btn-location-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  background-color: #2b7a78;
+  color: white;
+  border: none;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-location-icon:hover {
+  background-color: #256a69;
+}
+
+/* focuses highlight */
+.location-input:focus {
+  box-shadow: 0 0 0 0.15rem rgba(43, 122, 120, 0.25);
+  border-color: #2b7a78;
+}
+.location-gps-link {
+  font-weight: 600;
+  color: #2b7a78;
+  text-decoration: none;
+}
+
+.location-gps-link:hover {
+  text-decoration: underline;
+  color: #225f5d;
+}
+.btn-outline-theme {
+  border-color: #2b7a78;
+  color: #2b7a78;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  font-weight: 500;
+}
+
+.btn-outline-theme:hover {
+  background-color: #2b7a78;
+  color: #ffffff;
+}
+.btn-icon-view {
+  background: rgba(43, 122, 120, 0.08);
+  color: #2b7a78;
+  border: none;
+  border-radius: 0.45rem;
+  padding: 5px 9px;
+  transition: 0.2s ease;
+}
+
+.btn-icon-view:hover {
+  background: rgba(43, 122, 120, 0.18);
+  color: #1e5c5b;
+}
+
+.btn-icon-view i {
+  font-size: 15px;
+}
+
+.navbar .avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.dashboard-locked {
+  pointer-events: none;
+  filter: blur(3px);
+  opacity: 0.7;
+}
+
+.profile-gate {
+  position: fixed;
+  inset: 0;
+  background: rgba(246, 251, 251, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.profile-gate-card {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.15);
+}
+.btn-disabled {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+
+</style>
+</head>
+
+<body>
+  
+
+<!-- top bar -->
+<nav class="navbar fixed-top px-3 d-flex align-items-center">
+  <div class="container-fluid d-flex justify-content-between align-items-center">
+    <h5 class="mb-0 fw-bold" style="color:var(--primary)">Hygiene Tracker</h5>
+    <div class="d-flex align-items-center gap-3">
+      <img id="profileAvatar" src="assets/images/default-icon.png" class="avatar border border-1 border shadow-sm" alt="Profile" style="cursor:pointer" title="Profile" />
+      <!-- Notification Bell -->
+<div class="dropdown me-2">
+  <button class="btn p-0 border-0 bg-transparent position-relative" 
+    id="bellBtn" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell fs-5" style="color:#2b7a78;"></i>
+    <span id="bellCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+      style="font-size:0.6rem; display:none;">0</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:320px; max-height:400px; overflow-y:auto;" id="notificationDropdown">
+    <li class="px-3 py-2 fw-semibold border-bottom" style="color:#2b7a78;">Notifications</li>
+    <li id="notificationList">
+      <div class="px-3 py-2 text-muted small">No notifications</div>
+    </li>
+  </ul>
+</div>
+      <button id="logoutBtn" class="btn btn-theme btn-sm px-3 py-1 rounded-3">Logout</button>
+  
+    </div>
+  </div>
+</nav>
+
+<div class="page-body" id="dashboardContent">
+  <div class="container-fluid mt-3 px-0">
+    <div class="row gy-3 gx-0">
+      <!-- sidebar -->
+      <div class="col-md-3 col-lg-2 d-none d-md-block">
+        <div class="leftnav-theme p-3 h-100">
+          <div class="d-flex align-items-center mb-3">
+            <div class="flex-grow-1">
+              <div class="small text-white-50">Welcome back,</div>
+              <div id="citizenName" class="fw-semibold"></div>
+            </div>
+            <i class="bi bi-shield-check fs-4 opacity-75"></i>
+          </div>
+          <div class="mt-3">
+  <div class="small fw-semibold mb-1">Profile completion</div>
+  <div class="progress" style="height: 8px;">
+    <div id="profileProgress" class="progress-bar bg-success" style="width: 0%"></div>
+  </div>
+  <div id="profileProgressText" class="small text-muted mt-1">
+    0% completed
+  </div>
+</div>
+
+
+          <nav class="nav flex-column">
+            <a href="#" class="nav-link-theme active" data-target="overview"><i class="bi bi-speedometer2 me-2"></i> Overview</a>
+            <a href="#" class="nav-link-theme" data-target="reports"><i class="bi bi-flag me-2"></i> My Reports</a>
+            <a href="#" class="nav-link-theme" data-target="map"><i class="bi bi-map me-2"></i> City Map</a>
+            <a href="#" class="nav-link-theme" data-target="awareness"><i class="bi bi-journal-text me-2"></i> Awareness</a>
+            <a href="user-profile.html" class="nav-link-theme" data-target="profile"><i class="bi bi-person-circle me-2"></i> Profile</a>
+          </nav>
+
+          <hr class="border border-light border-opacity-25 my-3"/>
+
+          <div class="small text-white-50">
+            <div class="d-flex align-items-center mb-2">
+              <i class="bi bi-info-circle me-2"></i>
+              <span>Emergency?</span>
+            </div>
+            <div class="fw-semibold">Call 1913</div>
+            <div class="small">Municipal helpline</div>
+          </div>
+
+          <div class="mt-3 small text-white-50">
+            <div>Version 1.0 • Citizen</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- main content -->
+      <div class="col-md-9 col-lg-10">
+        <div class="container-fluid">
+          <div class="row g-3">
+            <!-- left column -->
+            <div class="col-lg-8">
+              <div class="row g-3">
+                <div class="col-4">
+                  <div class="stat shadow-soft">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <small class="text-uppercase text-muted fw-semibold" style="font-size:.7rem">My Reports</small>
+                      <i class="bi bi-flag"></i>
+                    </div>
+                    <h3 id="statTotal">--</h3>
+                    <small>Total submitted</small>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="stat shadow-soft">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <small class="text-uppercase text-muted fw-semibold" style="font-size:.7rem">Open</small>
+                      <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <h3 id="statOpen">--</h3>
+                    <small>Pending with officials</small>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="stat shadow-soft">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <small class="text-uppercase text-muted fw-semibold" style="font-size:.7rem">Resolved</small>
+                      <i class="bi bi-check2-circle"></i>
+                    </div>
+                    <h3 id="statClosed">--</h3>
+                    <small>Issues fixed</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- create report -->
+              <div class="card-soft shadow-soft mt-3 p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <div>
+                    <div class="section-title mb-1">New hygiene issue</div>
+                    <div class="small text-muted">Help us keep your neighbourhood clean. It takes less than a minute.</div>
+                  </div>
+                  <i class="bi bi-emoji-smile fs-3 text-warning opacity-75"></i>
+                </div>
+
+                <form id="reportForm" class="row g-2 mt-1">
+                  <div class="col-md-6">
+                    <label class="form-label">Issue type</label>
+                    <select id="reportType" class="form-select" required>
+                      <option value="">Select</option>
+                      <option>Garbage overflow</option>
+                      <option>Open dumping</option>
+                      <option>Blocked drain</option>
+                      <option>Public toilet unclean</option>
+                      <option>Water logging</option>
+                      <option>Animal waste</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label class="form-label">Ward / Area</label>
+                    <input id="reportWard" class="form-control" placeholder="Eg: Ward 12 - Gandhi Nagar" required/>
+                  </div>
+
+                  <!-- LOCATION -->
+                  <div class="col-12">
+                    <label class="form-label" for="reportLocation">Location</label>
+                    <div class="row g-2 align-items-center">
+                      <div class="col-8 col-md-9">
+                        <input
+                          id="reportLocation"
+                          class="form-control"
+                          placeholder="Search or use map…"
+                        />
+                      </div>
+                      <div class="col-4 col-md-3">
+                        <button
+                          type="button"
+                          id="useLocationBtn"
+                          class="btn btn-outline-theme w-100 h-100 d-flex align-items-center justify-content-center"
+                        >
+                          <i class="bi bi-geo-alt me-1"></i>
+                          <span class="d-none d-sm-inline">Use my GPS</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- DESCRIPTION -->
+                  <div class="col-12">
+                    <label class="form-label">Description</label>
+                    <input
+                      id="reportDesc"
+                      class="form-control"
+                      placeholder="Short note (optional but helpful)"
+                    />
+                  </div>
+
+                  <!-- PHOTO -->
+                  <div class="col-md-6">
+                    <label class="form-label">Photo</label>
+                    <input
+                      id="reportPhoto"
+                      type="file"
+                      class="form-control"
+                      accept="image/*"
+                    />
+                  </div>
+
+                  <!-- SUBMIT -->
+                  <div class="col-md-6 d-flex align-items-end justify-content-end">
+                    <button type="submit" class="btn btn-theme px-4">
+                      <i class="bi bi-send me-1"></i> Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- my recent reports -->
+              <div class="card-soft shadow-soft mt-3 p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <div class="section-title mb-0">My recent reports</div>
+                    <small class="text-muted">Track the issues you have raised</small>
+                  </div>
+                  <div class="d-flex gap-2 align-items-center">
+                    <select id="filterStatus" class="form-select form-select-sm" style="max-width:140px">
+                      <option value="">All statuses</option>
+                      <option>Pending</option>
+                      <option>In Progress</option>
+                      <option>Resolved</option>
+                    </select>
+                    <button id="refreshReportsBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i></button>
+                  </div>
+                </div>
+
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Issue</th>
+                        <th>Location</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentReportsBody">
+                      <!-- rows via JS -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- right column -->
+            <div class="col-lg-4">
+              <!-- map -->
+              <div class="card-soft shadow-soft p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div>
+                    <div class="section-title mb-0">City hygiene map</div>
+                    <small class="text-muted">Live sensor data & reports (demo)</small>
+                  </div>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button class="btn filter-pill active" data-map-filter="all">All</button>
+                    <button class="btn filter-pill" data-map-filter="sensors">Sensors</button>
+                    <button class="btn filter-pill" data-map-filter="reports">Reports</button>
+                  </div>
+                </div>
+                <div id="map" style="min-height:280px;">
+                  <div class="d-flex justify-content-center align-items-center h-100 text-muted small">
+                    Loading map…
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-2 small text-muted">
+                  <span><i class="bi bi-circle-fill me-1" style="font-size:.55rem;color:#e67e22"></i>High fill bins</span>
+                  <span><i class="bi bi-circle-fill me-1" style="font-size:.55rem;color:#3498db"></i>Reports</span>
+                </div>
+              </div>
+
+              <!-- awareness -->
+              <div class="awareness-card mb-3">
+                <div class="awareness-tag mb-1">Today’s tip</div>
+                <h6 id="tipTitle">Close your bin lids</h6>
+                <p id="tipText">Open garbage bins attract stray animals and spread odour. Tie your bag & keep the lid shut.</p>
+                <div class="d-flex flex-wrap gap-2 mt-1">
+                  <span class="chip bg-light text-dark"><i class="bi bi-droplet-half"></i> Dengue safety</span>
+                  <span class="chip bg-light text-dark"><i class="bi bi-recycle"></i> Segregate waste</span>
+                </div>
+              </div>
+
+              <!-- my activity timeline -->
+              <div class="card-soft shadow-soft p-3 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="section-title mb-0">My activity</div>
+                  <small class="text-muted" id="activitySummary">No activity yet</small>
+                </div>
+                <div id="activityTimeline" class="small">
+                  <!-- timeline items via JS -->
+                </div>
+              </div>
+
+              <!-- quick actions -->
+              <div class="card-soft shadow-soft p-3">
+                <div class="section-title mb-1">Quick actions</div>
+                <div class="small text-muted mb-2">Need to do something fast?</div>
+                <div class="quick-actions d-grid gap-2">
+                  <button class="btn btn-outline-secondary btn-sm" id="btnLocateNearestBin">
+                    <i class="bi bi-geo-alt me-1"></i> Find nearest bin (demo)
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" id="btnDownloadHistory">
+                    <i class="bi bi-file-earmark-arrow-down me-1"></i> Download my report history
+                  </button>
+                  <button class="btn btn-outline-secondary btn-sm" id="btnEmergencyContact">
+                    <i class="bi bi-telephone-outbound me-1"></i> Save municipal helpline
+                  </button>
+                </div>
+              </div>
+
+            </div><!-- /right col -->
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Report details modal -->
+<div class="modal fade" id="reportDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h6 class="modal-title mb-0">Report details</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body small" id="reportDetailBody">
+        <!-- filled via JS -->
+      </div>
+      <div class="modal-footer py-2 d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-danger btn-sm" id="deleteReportBtnFooter">
+          <i class="bi bi-trash me-1"></i> Delete report
+        </button>
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- toasts -->
+<div class="toast-container" id="toastContainer"></div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<div id="profileGate" class="profile-gate d-none">
+  <div class="profile-gate-card">
+    <h5 class="fw-bold mb-2">Complete your profile</h5>
+    <p class="text-muted small mb-3">
+      Please add a few basic details so officials can act on your reports.
+    </p>
+    <a href="user-profile.html" class="btn btn-theme">
+      Complete Profile
+    </a>
+  </div>
+</div>
+<script src="js/auth.js"></script>
+<script src="js/notifications.js"></script>
+<script src="js/citizen.js"></script>
+<script src="js/dashboard.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  requireProfileCompletion();
+  initDashboard();
+  initMap();
+  initReportSubmission();
+  loadMyReports();
+  updateStats();
+  loadNotificationBell();
+  document
+    .getElementById("useLocationBtn")
+    ?.addEventListener("click", locateUser);
+});
+</script>
+<script>
+  document.getElementById("profileAvatar").addEventListener("click", () => {
+    window.location.href = "user-profile.html";
+  });
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.removeItem("ht_current_user");
+  window.location.href = "index.html";
+});
+
+</script>
+
+
+
+
+</body>
+</html>

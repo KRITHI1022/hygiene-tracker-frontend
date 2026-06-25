@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Official Dashboard | Hygiene Tracker</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+  <style>
+    :root{
+      --primary:#2b7a78;
+      --ink:#10373a;
+      --muted:#6b7a79;
+      --bg:#f6fbfb;
+      --paper:#ffffff;
+      --ring:rgba(43,122,120,.18);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background:radial-gradient(circle at top left,#e7f5f4,#f6fbfb 40%);
+      color:var(--ink);
+      font-family:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    }
+    a{text-decoration:none;}
+
+    /* navbar – same as citizen but a bit softer */
+    .navbar{
+      height:64px;
+      box-shadow:0 4px 18px rgba(12,20,20,0.06);
+      background:#fff;
+      border-bottom:1px solid rgba(0,0,0,0.02);
+    }
+    .page-body{
+      padding-top:84px;
+    }
+
+    /* left sidebar */
+    .leftnav-theme {
+      background: linear-gradient(160deg,var(--primary),#215b59);
+      color: #fff;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+      height: calc(100vh - 64px);
+      position: sticky;
+      top: 64px;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.09);
+      z-index: 20;
+    }
+    .nav-link-theme{
+      display:block;
+      color:rgba(255,255,255,0.85);
+      margin-bottom:6px;
+      padding:10px 12px;
+      border-radius:10px;
+      transition:all .25s ease;
+      font-weight:500;
+      font-size:0.92rem;
+    }
+    .nav-link-theme:hover{
+      color:#fff;
+      background:rgba(255,255,255,0.12);
+      transform:translateX(3px);
+    }
+    .nav-link-theme.active{
+      color:#fff;
+      background:rgba(255,255,255,0.22);
+      box-shadow:inset 2px 0 0 #ffffff;
+    }
+
+    .shadow-soft{box-shadow:0 12px 30px rgba(16,24,24,.06);}
+    .card-soft{
+      background:var(--paper);
+      border:1px solid rgba(16,24,24,.04);
+      border-radius:18px;
+    }
+    .btn-theme{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      border-radius:999px;
+    }
+    .btn-theme:hover{background:#226f6d; color:#fff; box-shadow:0 6px 16px rgba(43,122,120,.3);}
+    .btn-outline-soft{
+      border-radius:999px;
+      border:1px solid rgba(16,24,24,.16);
+    }
+
+    .small-muted{color:var(--muted); font-size:.9rem;}
+
+    /* KPI cards – styled like citizen stats */
+    .kpigrid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:14px;
+    }
+    .kpi{
+      border-radius:16px;
+      background:linear-gradient(145deg,#ffffff,#f3faf9);
+      border:1px solid rgba(16,24,24,.05);
+      padding:16px 14px;
+    }
+    .kpi-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:4px;
+    }
+    .kpi-header small{
+      font-size:.78rem;
+      font-weight:600;
+      letter-spacing:.4px;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .kpi .num{
+      font-weight:800;
+      font-size:1.6rem;
+      color:var(--primary);
+    }
+
+    .card-panel{
+      padding:14px;
+      margin-bottom:12px;
+    }
+
+    .section-title{
+      font-size:.9rem;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    /* Kanban */
+    .kanban {
+      display:flex;
+      gap:16px;
+      align-items:flex-start;
+      overflow-x:auto;
+      padding-bottom:8px;
+    }
+    .kanban-column {
+      background:#f8fbfa;
+      border-radius:14px;
+      padding:10px;
+      min-width:250px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      max-height:640px;
+      overflow-y:auto;
+      border:1px solid rgba(16,24,24,.06);
+    }
+    .kanban-column h6 {
+      font-weight:600;
+      margin-bottom:10px;
+      text-align:center;
+      color:var(--primary);
+      font-size:0.9rem;
+    }
+
+    .task-card {
+      background:#fff;
+      border-radius:12px;
+      padding:12px 12px 10px;
+      margin-bottom:10px;
+      box-shadow:0 2px 7px rgba(0,0,0,0.06);
+      border-left:4px solid var(--primary);
+      transition:all 0.16s ease;
+      display:flex;
+      flex-direction:column;
+      cursor:pointer;
+    }
+    .task-card:hover {
+      transform:translateY(-3px);
+      box-shadow:0 10px 22px rgba(0,0,0,0.12);
+    }
+    .task-card strong {
+      font-size:0.96rem;
+      color:#0f3d3a;
+    }
+    .task-card .meta {
+      font-size:0.8rem;
+      color:var(--muted);
+      margin-top:2px;
+    }
+
+    /* table */
+    .table-sm th,.table-sm td{padding:.4rem .5rem}
+    .table thead th{
+      font-size:.8rem;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+      color:var(--muted);
+      border-bottom-color:rgba(16,24,24,.08);
+    }
+
+    /* map */
+    #officialMap{
+      min-height:280px;
+      height:280px;
+      border-radius:14px;
+      border:1px solid rgba(16,24,24,.06);
+      overflow:hidden;
+      background:#f0f4f4;
+    }
+    .leaflet-container{
+      width:100%!important;
+      height:100%!important;
+      border-radius:14px!important;
+    }
+
+    .filter-pill{
+      border:1px solid rgba(16,24,24,.12);
+      background:#fff;
+      color:#335152;
+      border-radius:999px;
+      padding:.2rem .75rem;
+      font-size:.8rem;
+    }
+    .filter-pill.active{
+      background:var(--primary);
+      color:#fff;
+      border-color:transparent;
+    }
+
+    .badge-priority{font-weight:600;}
+
+    /* right column cards */
+    .crew-item{
+      border-radius:10px;
+      border:1px solid rgba(16,24,24,.06);
+      padding:.5rem .6rem;
+      margin-bottom:.4rem;
+      background:#f9fbfb;
+      font-size:.85rem;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .toast-container{
+      position:fixed;
+      top:1rem;
+      right:1rem;
+      z-index:1200;
+    }
+
+    /* responsive */
+    @media(max-width:991px){
+      .leftnav-wrapper{display:none;}
+      .kpigrid{grid-template-columns:repeat(2,1fr);}
+    }
+
+    .task-card .meta i {
+  margin-right: 4px;
+}
+.task-card .meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+
+  </style>
+</head>
+<body>
+  <!-- top bar -->
+  <nav class="navbar fixed-top d-flex align-items-center">
+    <div class="container-fluid px-4 d-flex justify-content-between align-items-center">
+      <span class="navbar-brand fw-bold mb-0" style="color:var(--primary);font-size:1.1rem;">
+        Hygiene Tracker — Official
+      </span>
+      <div class="d-flex align-items-center">
+        <div id="officialName" class="me-3 small-muted"></div>
+        <button id="profileBtn" class="btn p-0 border-0 bg-transparent me-2">
+          <img id="profileAvatar" src="assets/images/default-icon.png" width="40" height="40" style="object-fit:cover;border-radius:50%;border:2px solid var(--primary)">
+        </button>
+        <!-- Notification Bell -->
+<div class="dropdown me-2">
+  <button class="btn p-0 border-0 bg-transparent position-relative" 
+    id="bellBtn" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="bi bi-bell fs-5" style="color:#2b7a78;"></i>
+    <span id="bellCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+      style="font-size:0.6rem; display:none;">0</span>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end shadow" style="min-width:320px; max-height:400px; overflow-y:auto;" id="notificationDropdown">
+    <li class="px-3 py-2 fw-semibold border-bottom" style="color:#2b7a78;">Notifications</li>
+    <li id="notificationList">
+      <div class="px-3 py-2 text-muted small">No notifications</div>
+    </li>
+  </ul>
+</div>
+        <button id="logoutBtn" class="btn btn-sm btn-theme px-3 py-1">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-body">
+    <div class="container-fluid mt-3 px-0">
+      <div class="row gy-3 gx-0">
+        <!-- sidebar -->
+        <div class="col-md-3 col-lg-2 d-none d-md-block leftnav-wrapper">
+          <div class="leftnav-theme p-3 h-100">
+            <div class="d-flex align-items-center mb-3">
+              <div class="flex-grow-1">
+                <div class="small text-white-50">Logged in as</div>
+                <div id="officialSidebarName" class="fw-semibold">Official</div>
+              </div>
+              <i class="bi bi-building-check fs-4 opacity-75"></i>
+            </div>
+
+            <nav class="nav flex-column">
+              <a class="nav-link-theme active" href="#" id="navOverview">
+                <i class="bi bi-speedometer2 me-2"></i> Overview
+              </a>
+              <a class="nav-link-theme" href="#" id="navIncidents">
+                <i class="bi bi-exclamation-circle me-2"></i> Incidents
+              </a>
+              <a class="nav-link-theme" href="#" id="navCrews">
+                <i class="bi bi-people me-2"></i> Crews
+              </a>
+              <a class="nav-link-theme" href="#" id="navMap">
+                <i class="bi bi-map me-2"></i> Map
+              </a>
+              <a class="nav-link-theme" href="#" id="navAnalytics">
+                <i class="bi bi-bar-chart me-2"></i> Analytics
+              </a>
+              <a class="nav-link-theme" href="official-profile.html" id="navProfile">
+                <i class="bi bi-person me-2"></i> Profile
+              </a>
+            </nav>
+
+            <hr class="border border-light border-opacity-25 my-3"/>
+
+            <div class="small text-white-50">
+              <div class="d-flex align-items-center mb-2">
+                <i class="bi bi-info-circle me-2"></i>
+                <span>Escalation?</span>
+              </div>
+              <div class="fw-semibold">Contact Zonal Officer</div>
+              <div class="small">Check internal directory</div>
+            </div>
+
+            <div class="mt-3 small text-white-50">
+              <div>Version 1.0 • Official</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- main content -->
+        <div class="col-md-9 col-lg-10">
+          <div class="container-fluid">
+            <div class="row g-3">
+              <!-- left column: KPIs + kanban/table -->
+              <div class="col-lg-8" id="overviewSection">
+                <!-- Overview KPIs -->
+                <div class="kpigrid" id="analyticsSection">
+                  <div class="kpi shadow-soft">
+                    <div class="kpi-header">
+                      <small>Total Incidents</small>
+                      <i class="bi bi-activity text-muted"></i>
+                    </div>
+                    <div class="num" id="kpiTotal">--</div>
+                  </div>
+                  <div class="kpi shadow-soft">
+                    <div class="kpi-header">
+                      <small>Pending</small>
+                      <i class="bi bi-hourglass-split text-muted"></i>
+                    </div>
+                    <div class="num" id="kpiPending">--</div>
+                  </div>
+                  <div class="kpi shadow-soft">
+                    <div class="kpi-header">
+                      <small>Assigned</small>
+                      <i class="bi bi-people-fill text-muted"></i>
+                    </div>
+                    <div class="num" id="kpiAssigned">--</div>
+                  </div>
+                  <div class="kpi shadow-soft">
+                    <div class="kpi-header">
+                      <small>Avg Resolution (hrs)</small>
+                      <i class="bi bi-lightning-charge text-muted"></i>
+                    </div>
+                    <div class="num" id="kpiMTTR">--</div>
+                  </div>
+                </div>
+
+                <!-- controls -->
+                <div class="card-soft shadow-soft card-panel d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="btn-group btn-group-sm" id="viewToggle" role="group">
+                      <button class="btn btn-outline-soft active" data-view="kanban">Kanban</button>
+                      <button class="btn btn-outline-soft" data-view="table">Table</button>
+                    </div>
+
+                    <select id="filterStatus" class="form-select form-select-sm ms-2" style="max-width:180px;">
+                      <option value="">All statuses</option>
+                      <option>Pending</option>
+                      <option>Assigned</option>
+                      <option>In Progress</option>
+                      <option>Resolved</option>
+                    </select>
+                  </div>
+
+                  <div class="d-flex align-items-center">
+                    <button id="refreshBtn" class="btn btn-sm btn-outline-secondary me-2" title="Refresh">
+                      <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button id="newTaskBtn" class="btn btn-sm btn-theme" data-bs-toggle="modal" data-bs-target="#taskModal">
+                      <i class="bi bi-plus-lg"></i> New Task
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Kanban view -->
+<!-- <div id="kanbanView" class="card-soft shadow-soft card-panel"> -->
+  <div id="kanbanView" class="card-soft shadow-soft card-panel" style="display:none;">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <div class="section-title mb-0">Workboard</div>
+      <small class="text-muted">Drag-friendly layout feel, but click cards to manage</small>
+    </div>
+  </div>
+  <div class="kanban" id="kanbanBoard" aria-live="polite">
+    <!-- columns by JS -->
+  </div>
+</div>
+
+<!-- Table / List view -->
+<!-- <div id="tableView" class="card-soft shadow-soft card-panel" style="display:none;"> -->
+  <div id="tableView" class="card-soft shadow-soft card-panel">
+
+  <div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+      <div class="section-title mb-0">Incidents list</div>
+      <small class="text-muted">Compact list for quick scanning</small>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width:40px;">#</th>
+          <th>Issue & location</th>
+          <th style="width:140px;">Reporter</th>
+          <th style="width:110px;">Status</th>
+          <th style="width:100px;">Priority</th>
+          <th style="width:80px;">Action</th>
+        </tr>
+      </thead>
+      <tbody id="officialReportsBody"></tbody>
+    </table>
+  </div>
+</div>
+
+
+                
+              </div>
+
+              <!-- right column: map + crews + alerts -->
+              <div class="col-lg-4">
+                <!-- Map -->
+                <div class="card-soft shadow-soft card-panel mb-3" id="mapSection">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <div class="section-title mb-0">Live hygiene map</div>
+                      <small class="text-muted">Sensors & active incidents</small>
+                    </div>
+                    <button class="btn btn-sm btn-theme" id="centerCity">
+                      <i class="bi bi-crosshair"></i>
+                    </button>
+                  </div>
+                  <div class="d-flex gap-2 mb-2">
+                    <button class="btn btn-sm filter-pill active" id="filterMapAll">All</button>
+                    <button class="btn btn-sm filter-pill" id="filterMapSensor">Sensors</button>
+                    <button class="btn btn-sm filter-pill" id="filterMapReports">Reports</button>
+                  </div>
+                  <div id="officialMap"></div>
+                </div>
+
+                <!-- Crews -->
+                <div class="card-soft shadow-soft card-panel mb-3" id="crewsSection">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div>
+                      <div class="section-title mb-0">Crews on duty</div>
+                      <small class="text-muted">Assign and track field teams</small>
+                    </div>
+                    <button id="manageCrewsBtn" class="btn btn-sm btn-outline-secondary">
+                      Manage
+                    </button>
+                  </div>
+                  <div id="crewList"></div>
+                </div>
+
+                <!-- Quick alerts -->
+                <div class="card-soft shadow-soft card-panel">
+                  <div class="section-title mb-1">Quick alerts</div>
+                  <small class="text-muted d-block mb-2">Recent escalations & important notices</small>
+                  <div id="quickAlerts"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Task Modal -->
+  <div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <form id="taskForm" class="modal-body p-3">
+          <h5>Create / Assign Task</h5>
+          <div class="mb-2">
+            <label class="form-label">Issue</label>
+            <input id="taskIssue" class="form-control" required/>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Location</label>
+            <input id="taskLocation" class="form-control" required/>
+          </div>
+
+          <div class="row gx-2">
+            <div class="col-6 mb-2">
+              <label class="form-label">Priority</label>
+              <select id="taskPriority" class="form-select">
+                <option>Low</option>
+                <option selected>Medium</option>
+                <option>High</option>
+                <option>Critical</option>
+              </select>
+            </div>
+            <div class="col-6 mb-2">
+              <label class="form-label">Assign to crew</label>
+              <select id="taskCrew" class="form-select"></select>
+            </div>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label">Due (optional)</label>
+            <input id="taskDue" type="datetime-local" class="form-control"/>
+          </div>
+
+          <div class="text-end">
+            <button class="btn btn-theme" type="submit">Create Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 id="detailTitle" class="modal-title">Incident Detail</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-3">
+          <div id="detailContent"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="detailAssignBtn" class="btn btn-outline-secondary">Assign</button>
+          <button id="detailResolveBtn" class="btn btn-theme">Mark Resolved</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resolve Modal -->
+  <div class="modal fade" id="resolveModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+      <div class="modal-content">
+        <form id="resolveForm" class="modal-body p-3">
+          <h5>Resolve Incident</h5>
+          <div class="mb-2">
+            <label class="form-label">Resolution Note</label>
+            <textarea id="resolveNote" class="form-control" rows="3" required></textarea>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">Upload Photo</label>
+            <input id="resolvePhoto" type="file" accept="image/*" class="form-control" required/>
+          </div>
+          <div class="text-end">
+            <button class="btn btn-theme" type="submit">Submit Resolution</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script src="js/official-dashboard.js"></script>
+  <script src="js/notifications.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  loadAllReports();
+  updateOfficialKPIs();
+  initOfficialMap();
+  loadNotifications();
+  loadNotificationBell();
+});
+
+</script>
+
+</body>
+</html>

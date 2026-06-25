@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Official Profile • Hygiene Tracker</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Icons -->
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+
+
+  <style>
+    :root{
+      --primary:#2b7a78;
+      --ink:#10373a;
+      --muted:#6b7a79;
+      --paper:#ffffff;
+      --bg:#f6fbfb;
+      --ring: rgba(43,122,120,.18);
+    }
+    html,body{
+      background:var(--bg);
+      color:var(--ink);
+      font-family: "Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial;
+    }
+
+    /* Top hero */
+    .hero{
+      background: linear-gradient(135deg, rgba(43,122,120,.95), rgba(43,122,120,.75)),
+                  url('../assets/images/landing.jpg')
+                  center/cover no-repeat;
+      color:#fff;
+      border-bottom:1px solid rgba(255,255,255,.15);
+      padding:2.5rem 0 4.5rem; /* more teal height */
+    }
+    .hero .brand{font-weight:800; letter-spacing:.2px;}
+
+    .avatar-xl{
+      width:110px;
+      height:110px;
+      border-radius:50%;
+      object-fit:cover;
+      border:3px solid rgba(255,255,255,.9);
+      box-shadow:0 6px 24px rgba(0,0,0,.18);
+    }
+
+    /* Shell (card wrapper) */
+    .shell{
+      max-width:1100px;
+      margin:-48px auto 40px; /* pull card into teal area a bit more */
+      padding:0 16px;
+    }
+
+    .card-soft{
+      background:var(--paper);
+      border-radius:16px;
+      box-shadow:0 10px 30px rgba(16,24,24,.07);
+      border:1px solid rgba(16,24,24,.06);
+    }
+    .sidebar{
+      position:sticky;
+      top:88px;
+    }
+
+    /* Tabs */
+    .pill-tabs .nav-link{
+      border-radius:999px;
+      color:var(--ink);
+    }
+    .pill-tabs .nav-link.active{
+      background:var(--primary);
+      color:#fff;
+      box-shadow:0 6px 16px var(--ring);
+    }
+
+    /* Inputs */
+    .form-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      color: #226f6d;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display:block;
+    }
+
+    .form-control, .form-select {
+      background: #f9fbfb;
+      border-radius: 10px;
+      border: 1px solid rgba(16,24,24,.15);
+      font-size: 0.95rem;
+      color: #0f3d3a;
+      transition: all 0.2s ease-in-out;
+      height: 46px;
+      padding: 8px 14px;
+      box-sizing:border-box;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.25rem rgba(43,122,120,0.15);
+    }
+
+    .form-select {
+      appearance:auto;
+      line-height:1.4;
+    }
+
+    #profileForm .col-md-6 {
+      display:flex;
+      flex-direction:column;
+      margin-bottom:16px;
+    }
+
+    #profileForm .btn-theme {
+      font-size: 1rem;
+      border-radius: 10px;
+      transition: all 0.25s ease;
+    }
+
+    #profileForm .btn-theme:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(43,122,120,0.25);
+    }
+
+    .btn-theme{
+      background:var(--primary);
+      color:#fff;
+      border:none;
+      border-radius:10px;
+    }
+    .btn-theme:hover{
+      background:#226f6d;
+    }
+
+    .btn-theme.btn-sm {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      transition: all 0.25s ease;
+    }
+    .btn-theme.btn-sm:hover {
+      background: #226f6d;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(43,122,120,0.25);
+    }
+
+    .btn-outline-secondary.btn-sm {
+      border-color: rgba(43,122,120,0.25);
+      color: var(--primary);
+      background: #fff;
+    }
+    .btn-outline-secondary.btn-sm:hover {
+      background: #f5fafa;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    /* Stat chips */
+    .chip{
+      background:#f0fbfa;
+      border:1px solid rgba(16,24,24,.08);
+      padding:12px;
+      border-radius:12px;
+      text-align:center;
+    }
+    .chip h4{
+      margin:4px 0 0;
+      font-weight:800;
+      color:var(--primary);
+    }
+    .chip small{color:var(--muted);}
+
+    /* Info rows */
+    .meta-row{
+      display:flex;
+      gap:14px;
+      flex-wrap:wrap;
+    }
+    .meta{
+      background:#fbfefe;
+      border:1px dashed rgba(16,24,24,.1);
+      padding:10px 12px;
+      border-radius:10px;
+      font-size:.92rem;
+      color:#335152;
+    }
+
+    /* Upload preview boxes */
+    .preview{
+      border:1px dashed rgba(16,24,24,.18);
+      border-radius:12px;
+      padding:8px;
+      background:#fcfffe;
+    }
+
+    /* Toast container */
+    .toast-container{
+      position:fixed;
+      top:16px;
+      right:16px;
+      z-index:1200;
+    }
+    .employment-pill {
+    background: #e8f5f4; /* soft mint just like Citizen */
+    padding: 6px 14px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #0f3d3a;
+    border: 1px solid rgba(43,122,120,0.18);
+}
+
+.employment-pill i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+.emp-tag {
+    background: rgba(43, 122, 120, 0.10); /* very soft mint */
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: rgb(43 122 120 / 89%);
+    transition: 0.2s ease;
+}
+
+.emp-tag i {
+    font-size: 0.9rem;
+    color: var(--primary);
+}
+
+.emp-tag:hover {
+    background: rgba(43, 122, 120, 0.15);
+    transform: translateY(-1px);
+}
+.emp-tag i {
+    font-size: 0.9rem;
+    color: rgb(43 122 120 / 89%);
+}
+.toast {
+    border-radius: 12px !important;
+    backdrop-filter: blur(8px);
+}
+
+.toast-body {
+    font-size: 0.9rem;
+    color: #0f3d3a;
+}
+
+.toast.text-bg-light {
+    background: #f1faf9 !important;
+    border-left: 4px solid #2b7a78 !important;
+}
+
+
+
+  </style>
+</head>
+<body>
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="container d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <div class="brand h4 mb-0">Hygiene Tracker</div>
+        <span class="opacity-75">• Official Profile</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button id="backBtn" class="btn btn-light btn-sm rounded-pill">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <button id="logoutBtn" class="btn btn-outline-light btn-sm rounded-pill">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HEADER CARD -->
+  <div class="shell">
+    <div class="card-soft p-4">
+      <div class="d-flex align-items-center gap-3 flex-wrap">
+        <img id="avatar" class="avatar-xl" src="assets/images/default-icon.png" alt="Official photo">
+
+        <div class="flex-grow-1">
+          <!-- Name + OFFICIAL badge -->
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <h3 class="mb-0" id="offName" id="displayOfficialName"></h3>
+            <span id="roleBadge" class="emp-tag d-flex align-items-center gap-1">
+              <i class="bi bi-person-badge"></i>
+              <span id="roleText">Contract</span>
+            </span>
+          </div>
+          <div class="meta-row">
+            <div class="meta">
+              <i class="bi bi-award"></i>
+              <span id="designationMeta">Designation</span>
+            </div>
+            <div class="meta">
+              <i class="bi bi-building"></i>
+              <span id="deptMeta">Department</span>
+            </div>
+            <div class="meta">
+              <i class="bi bi-geo-alt"></i>
+              <span id="zoneMeta">Zone / Ward</span>
+            </div>
+            <!-- Access chip removed per your request -->
+          </div>
+        </div>
+
+        <!-- Vertical action buttons -->
+        <div class="d-flex flex-column align-items-center justify-content-center ms-auto gap-2">
+          <label class="btn btn-outline-secondary btn-sm rounded-circle shadow-sm"
+                 title="Update Photo"
+                 style="width:44px; height:44px; display:flex; align-items:center; justify-content:center;">
+            <i class="bi bi-camera" style="font-size:1.2rem;"></i>
+            <input type="file" id="photoInput" accept="image/*" hidden>
+          </label>
+
+          <button id="saveAllTop"
+                  class="btn btn-theme btn-sm rounded-circle shadow-sm"
+                  title="Save Profile"
+                  style="width:44px; height:44px; display:flex; align-items:center; justify-content:center;">
+            <i class="bi bi-save" style="font-size:1.1rem;"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY GRID -->
+    <div class="row mt-3 g-3">
+      <!-- Left: Tabs & Forms -->
+      <div class="col-lg-8">
+        <div class="card-soft p-3">
+          <!-- Tabs -->
+          <ul class="nav nav-pills pill-tabs mb-3" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tabProfile" type="button">
+                Profile
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabIdentity" type="button">
+                Identity
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabPerformance" type="button">
+                Performance
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tabSecurity" type="button">
+                Security
+              </button>
+            </li>
+          </ul>
+
+          <div class="tab-content">
+            <!-- PROFILE -->
+            <div class="tab-pane fade show active" id="tabProfile">
+              <form id="profileForm" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Full Name</label>
+                  <input class="form-control" id="name" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Employee ID</label>
+                  <input class="form-control" id="empId" required>
+                </div>
+
+                <!-- Department -->
+                <div class="col-md-6">
+                  <label class="form-label">Department</label>
+                  <select class="form-select" id="department" required>
+                    <option value="">Select Department</option>
+                    <option>Solid Waste Management</option>
+                    <option>Public Health & Sanitation</option>
+                    <option>Environmental Engineering</option>
+                    <option>Water Supply & Sewerage</option>
+                    <option>Urban Infrastructure & Drainage</option>
+                    <option>City Planning & Development</option>
+                  </select>
+                </div>
+
+                <!-- Designation -->
+                <div class="col-md-6">
+                  <label class="form-label">Designation</label>
+                  <select class="form-select" id="designation" required>
+                    <option value="">Select Designation</option>
+                    <option>Sanitary Inspector</option>
+                    <option>Zonal Sanitary Officer</option>
+                    <option>Assistant Health Officer</option>
+                    <option>Solid Waste Management Officer</option>
+                    <option>Environmental Engineer</option>
+                    <option>Municipal Commissioner</option>
+                  </select>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Official Email</label>
+                  <input type="email" class="form-control" id="email" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Contact Number</label>
+                  <input class="form-control" id="phone" placeholder="+91-">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Zone / Ward</label>
+                  <input class="form-control" id="zone" placeholder="Eg: Zone 9 – T. Nagar" required>
+                </div>
+
+                <!-- Access Level -->
+                <div class="col-md-6">
+                  <label class="form-label">Access Level</label>
+                  <select class="form-select" id="accessLevel" required>
+                    <option value="">Select Access Level</option>
+                    <option>Ward</option>
+                    <option>Zone</option>
+                    <option>City</option>
+                    <option>Admin</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label">Office Address</label>
+                  <textarea class="form-control" id="address" rows="2" style="height:auto;"></textarea>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Joining Date</label>
+                  <input type="date" class="form-control" id="joinDate">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="form-label">Employment Type</label>
+                  <select class="form-select" id="employmentType" required>
+                    <option value="">Select Employment Type</option>
+                    <option>Permanent</option>
+                    <option>Contract</option>
+                    <option>Temporary</option>
+                  </select>
+                </div>
+
+                <!-- Centered Save Button -->
+                <div class="col-12 text-center mt-4">
+                  <button class="btn btn-theme px-5 py-2" type="submit" style="font-weight:600;">
+                    <i class="bi bi-check-circle me-1"></i> Save Profile
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- IDENTITY -->
+            <div class="tab-pane fade" id="tabIdentity">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Upload Signature</label>
+                  <input type="file" class="form-control" id="signatureInput" accept="image/*">
+                  <div class="preview mt-2">
+                    <img id="signaturePreview" class="img-fluid rounded" alt="Signature preview"/>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">QR Identity (scannable)</label>
+                  <div class="preview d-flex flex-column align-items-center justify-content-center" style="min-height:180px;">
+                    <div id="qrCode"></div>
+                    <small class="text-muted mt-2">Scan to verify official email</small>
+                  </div>
+                </div>
+                <div class="col-12 text-end">
+                  <button id="saveIdentity" class="btn btn-theme px-4">Save Identity</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- PERFORMANCE -->
+            <div class="tab-pane fade" id="tabPerformance">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <div class="chip">
+                    <small>Reports Managed</small>
+                    <h4 id="statTotal">—</h4>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="chip">
+                    <small>Resolved</small>
+                    <h4 id="statResolved">—</h4>
+                  </div>
+                </div>
+                <div class="col-md-4">
+                  <div class="chip">
+                    <small>Avg Resolution</small>
+                    <h4 id="statMTTR">—</h4>
+                  </div>
+                </div>
+              </div>
+              <p class="mt-3 text-muted">
+                Stats are computed from your dashboard data and stored locally for demo. Hook to backend later.
+              </p>
+            </div>
+
+            <!-- SECURITY -->
+            <div class="tab-pane fade" id="tabSecurity">
+              <form id="securityForm" class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">New Password</label>
+                  <input type="password" class="form-control" id="newPassword" placeholder="Enter new password">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Confirm Password</label>
+                  <input type="password" class="form-control" id="confirmPassword" placeholder="Re-enter password">
+                </div>
+                <div class="col-12">
+                  <label class="form-label">2FA (coming soon)</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="twoFA" disabled>
+                    <label class="form-check-label text-muted" for="twoFA">
+                      Enable OTP-based login (backend)
+                    </label>
+                  </div>
+                </div>
+                <div class="col-12 text-end">
+                  <button class="btn btn-theme px-4" type="submit">Update Security</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Summary & Quick Actions -->
+      <div class="col-lg-4">
+        <div class="sidebar">
+          <div class="card-soft p-3 mb-3">
+            <h6 class="mb-2">Quick Summary</h6>
+            <div class="small text-muted mb-2">Pulled from your saved profile.</div>
+            <div class="d-grid gap-2">
+              <div class="d-flex justify-content-between">
+                <span>Name</span><strong id="sumName">—</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Employee ID</span><strong id="sumEmp">—</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Department</span><strong id="sumDept">—</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Designation</span><strong id="sumDesig">—</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Zone</span><strong id="sumZone">—</strong>
+              </div>
+              <!-- Access line removed from summary too -->
+            </div>
+            <hr class="my-3"/>
+            <button id="downloadCard" class="btn btn-outline-secondary w-100">
+              <i class="bi bi-download me-1"></i> Download ID (PNG)
+            </button>
+          </div>
+
+          <div class="card-soft p-3">
+            <h6 class="mb-2">Tips</h6>
+            <ul class="small text-muted mb-0">
+              <li>Use a clear headshot for the avatar.</li>
+              <li>Keep your zone and access level updated.</li>
+              <li>Signature & QR help verify resolutions in the field.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="toast-container" id="toastContainer"></div>
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 2000;">
+    <div id="profileToast" class="toast align-items-center text-bg-light border-0 shadow-sm" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">Saved successfully!</div>
+            <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+
+    // AUTH GUARD
+    const token = localStorage.getItem("ht_token");
+    const currentUser = JSON.parse(localStorage.getItem("ht_current_user"));
+
+    if (!token || !currentUser || currentUser.role !== "OFFICIAL") {
+      window.location.href = "index.html";
+      return;
+    }
+
+    // LOAD PROFILE FROM API
+    try {
+      const response = await fetch("http://localhost:8080/api/users/me", {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const user = await response.json();
+
+        // Fill header
+        document.getElementById("offName").textContent = user.name || "Official";
+        document.getElementById("designationMeta").textContent = user.district || "Designation";
+        document.getElementById("deptMeta").textContent = user.area || "Department";
+        document.getElementById("zoneMeta").textContent = user.wardNumber ? `Ward ${user.wardNumber}` : "Zone / Ward";
+
+        // Fill form fields
+        document.getElementById("name").value = user.name || "";
+        document.getElementById("email").value = user.email || "";
+        document.getElementById("phone").value = user.phone || "";
+        document.getElementById("zone").value = user.wardNumber || "";
+
+        // Fill summary card
+        document.getElementById("sumName").textContent = user.name || "—";
+        document.getElementById("sumEmp").textContent = user.email || "—";
+        document.getElementById("sumDept").textContent = user.area || "—";
+        document.getElementById("sumDesig").textContent = user.district || "—";
+        document.getElementById("sumZone").textContent = user.wardNumber ? `Ward ${user.wardNumber}` : "—";
+      }
+    } catch (error) {
+      console.error("Error loading profile:", error);
+    }
+
+    // SAVE PROFILE
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const request = {
+        name: document.getElementById("name").value.trim(),
+        phone: document.getElementById("phone").value.trim(),
+        wardNumber: document.getElementById("zone").value.trim()
+      };
+
+      try {
+        const response = await fetch("http://localhost:8080/api/users/me", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify(request)
+        });
+
+        if (response.ok) {
+          alert("Official profile saved successfully!");
+          window.location.href = "official-dashboard.html";
+        } else {
+          alert("Failed to save profile");
+        }
+      } catch (error) {
+        alert("Cannot connect to server");
+      }
+    });
+
+    // BACK BUTTON
+    document.getElementById("backBtn").addEventListener("click", () => {
+      window.location.href = "official-dashboard.html";
+    });
+
+    // LOGOUT
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      localStorage.removeItem("ht_token");
+      localStorage.removeItem("ht_current_user");
+      window.location.href = "index.html";
+    });
+
+  });
+</script>
+
+
+</body>
+</html>
